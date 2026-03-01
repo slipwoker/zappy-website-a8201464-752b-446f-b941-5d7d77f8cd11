@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <title>Indie Video Game Developer with Retro Vibes — SJohnson</title>
+    <meta name="description" content="SJohnson crafts nostalgic indie games with early-2000s arcade charm. Experience authentic, experimental video game developer magic that celebrates chaos.">
+    <meta name="keywords" content="video game developer, indie game developer, retro arcade games, SJohnson, nostalgic gaming">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512x512.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <!-- Zappy Analytics -->
+<script>
+(function() {
+  'use strict';
+  
+  // Configuration
+  var config = {
+    websiteId: 'a8201464-752b-446f-b941-5d7d77f8cd11',
+    apiUrl: 'https://api.zappy5.com/api/analytics/track',
+    sessionDuration: 30 * 60 * 1000, // 30 minutes
+    visitorDuration: 30 * 24 * 60 * 60 * 1000, // 30 days
+    trackPageViews: true,
+    trackClicks: true,
+    trackFormSubmissions: true
+  };
+  
+  // Generate or retrieve persistent visitor ID (30 days)
+  function getVisitorId() {
+    var visitorKey = 'zappy_visitor_' + config.websiteId;
+    var visitor = null;
+    
+    try {
+      visitor = localStorage.getItem(visitorKey);
+      if (visitor) {
+        var visitorData = JSON.parse(visitor);
+        var now = Date.now();
+        
+        // Check if visitor ID is still valid (30 days)
+        if (now - visitorData.created < config.visitorDuration) {
+          // Update last seen timestamp
+          visitorData.lastSeen = now;
+          localStorage.setItem(visitorKey, JSON.stringify(visitorData));
+          return visitorData.id;
+        }
+      }
+    } catch (e) {
+      console.warn('Zappy Analytics: LocalStorage not available');
+    }
+    
+    // Generate new visitor ID
+    var newVisitorId = 'zv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    try {
+      localStorage.setItem(visitorKey, JSON.stringify({
+        id: newVisitorId,
+        created: Date.now(),
+        lastSeen: Date.now()
+      }));
+    } catch (e) {
+      // Continue without local storage
+    }
+    
+    return newVisitorId;
+  }
+  
+  // Generate or retrieve session ID (30 minutes)
+  function getSessionId() {
+    var sessionKey = 'zappy_session_' + config.websiteId;
+    var session = null;
+    
+    try {
+      session = sessionStorage.getItem(sessionKey);
+      if (session) {
+        var sessionData = JSON.parse(session);
+        var now = Date.now();
+        
+        // Check if session is still valid
+        if (now - sessionData.timestamp < config.sessionDuration) {
+          // Update timestamp
+          sessionData.timestamp = now;
+          sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
+          return sessionData.id;
+        }
+      }
+    } catch (e) {
+      console.warn('Zappy Analytics: SessionStorage not available');
+    }
+    
+    // Generate new session ID
+    var newSessionId = 'zs_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    try {
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        id: newSessionId,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      // Continue without session storage
+    }
+    
+    return newSessionId;
+  }
+  
+  var visitorId = getVisitorId();
+  var sessionId = getSessionId();
+  
+  // Track an event
+  function trackEvent(eventType, data) {
+    data = data || {};
+    
+    var eventData = {
+      website_id: config.websiteId,
+      event_type: eventType,
+      page_path: window.location.pathname,
+      referrer: document.referrer || 'direct',
+      visitor_id: visitorId,
+      session_id: sessionId,
+      metadata: data
+    };
+    
+    // Use sendBeacon if available (better for page unload events)
+    if (navigator.sendBeacon) {
+      var blob = new Blob([JSON.stringify(eventData)], { type: 'application/json' });
+      navigator.sendBeacon(config.apiUrl, blob);
+    } else {
+      // Fallback to fetch
+      fetch(config.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(eventData),
+        keepalive: true
+      }).catch(function(error) {
+        console.warn('Zappy Analytics: Failed to track event', error);
+      });
+    }
+  }
+  
+  // Track page view
+  if (config.trackPageViews) {
+    trackEvent('pageview', {
+      title: document.title,
+      url: window.location.href
+    });
+  }
+  
+  // Track clicks on important elements
+  if (config.trackClicks) {
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      
+      // Track button clicks (counted as actions)
+      if (target.tagName === 'BUTTON' || target.closest('button')) {
+        var button = target.tagName === 'BUTTON' ? target : target.closest('button');
+        trackEvent('click', {
+          element: 'button',
+          text: button.textContent.trim().substring(0, 100),
+          id: button.id || null,
+          class: button.className || null
+        });
+      }
+      
+      // Track link clicks (navigation - not counted as actions)
+      else if (target.tagName === 'A' || target.closest('a')) {
+        var link = target.tagName === 'A' ? target : target.closest('a');
+        trackEvent('navigation', {
+          element: 'link',
+          text: link.textContent.trim().substring(0, 100),
+          href: link.href,
+          external: link.hostname !== window.location.hostname
+        });
+      }
+    }, true);
+  }
+  
+  // Track form submissions
+  if (config.trackFormSubmissions) {
+    document.addEventListener('submit', function(e) {
+      var form = e.target;
+      
+      trackEvent('form_submit', {
+        form_id: form.id || null,
+        form_name: form.name || null,
+        form_action: form.action || null,
+        form_method: form.method || 'GET'
+      });
+    }, true);
+  }
+  
+  // Track time on page (send on page unload)
+  var pageLoadTime = Date.now();
+  
+  window.addEventListener('beforeunload', function() {
+    var timeOnPage = Math.floor((Date.now() - pageLoadTime) / 1000); // in seconds
+    
+    trackEvent('page_unload', {
+      time_on_page: timeOnPage,
+      page_path: window.location.pathname
+    });
+  });
+  
+  // Expose tracking function globally for custom events
+  window.zappyAnalytics = {
+    track: trackEvent,
+    getVisitorId: function() { return visitorId; },
+    getSessionId: function() { return sessionId; }
+  };
+  
+})();
+</script>
+<!-- End Zappy Analytics -->
+    <meta property="og:title" content="Indie Video Game Developer with Retro Vibes — SJohnson">
+  <meta property="og:description" content="SJohnson crafts nostalgic indie games with early-2000s arcade charm. Experience authentic, experimental video game developer magic that celebrates chaos.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Indie Video Game Developer with Retro Vibes — SJohnson">
+  <meta name="twitter:description" content="SJohnson crafts nostalgic indie games with early-2000s arcade charm. Experience authentic, experimental video game developer magic that celebrates chaos.">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512x512.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <!-- Cookie Consent -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
+    <!-- Mickidum Accessibility Toolbar -->
+    <script src="https://cdn.jsdelivr.net/gh/mickidum/acc_toolbar/acctoolbar/acctoolbar.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+
+    <style id="zappy-dropdown-submenu-styles">
+      /* ========== DESKTOP DROPDOWN SUBMENU STYLES ========== */
+      /* Base styles for dropdown submenus - parent must be positioned */
+      .nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu) { position: relative; }
+      /* Submenu base - hidden by default */
+      .nav-menu .sub-menu, nav .sub-menu, .navbar .sub-menu, #navMenu .sub-menu { display: block !important; position: absolute !important; top: 100%; left: 0; min-width: 220px; background: white; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); padding: 8px 0; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease; z-index: 1000; list-style: none; pointer-events: none; }
+      /* CRITICAL: Desktop hover styles to show dropdown */
+      .nav-menu li:hover > .sub-menu, nav li:hover > .sub-menu, .navbar li:hover > .sub-menu, #navMenu li:hover > .sub-menu { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; pointer-events: auto !important; }
+      /* Submenu item styling */
+      .sub-menu li { list-style: none; margin: 0; padding: 0; }
+      .sub-menu a { display: block !important; padding: 10px 16px !important; color: #333 !important; font-weight: 500; text-decoration: none; white-space: nowrap; transition: background-color 0.2s; }
+      .sub-menu a:hover { background-color: #f5f5f5; }
+      /* RTL (Hebrew/Arabic) dropdown positioning */
+      [dir="rtl"] .nav-menu .sub-menu, [dir="rtl"] nav .sub-menu, [dir="rtl"] .navbar .sub-menu, html[lang="he"] .nav-menu .sub-menu, html[lang="he"] nav .sub-menu, html[lang="he"] .navbar .sub-menu, html[lang="ar"] .nav-menu .sub-menu, html[lang="ar"] nav .sub-menu, html[lang="ar"] .navbar .sub-menu { left: auto !important; right: 0 !important; }
+      /* Hide empty dropdown menus */
+      .sub-menu:empty, .sub-menu:not(:has(li:not(.zappy-hidden-menu-item))), .sub-menu:not(:has(li)) { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+      /* Desktop: show submenu on Menu Group hover */
+      li:has(.menu-group-title):hover > .sub-menu { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; pointer-events: auto !important; }
+      /* Menu Group title styling */
+      .nav-menu > li > .menu-group-title, #navMenu > li > .menu-group-title { display: inline-block; padding: 0.5rem 1rem; cursor: default; user-select: none; }
+      
+      /* ========== MOBILE SUBMENU STYLES ========== */
+      @media (max-width: 768px) {
+        .nav-menu .sub-menu, nav .sub-menu, .navbar .sub-menu, #navMenu .sub-menu { position: static !important; transform: none !important; box-shadow: none !important; background: transparent !important; max-height: 0; overflow: hidden; opacity: 0; visibility: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; padding: 0 !important; border-radius: 0 !important; }
+        .sub-menu.mobile-expanded { max-height: 500px !important; opacity: 1 !important; visibility: visible !important; padding: 8px 0 8px 16px !important; }
+        [dir="rtl"] .sub-menu.mobile-expanded, html[lang="he"] .sub-menu.mobile-expanded { padding: 8px 16px 8px 0 !important; }
+        /* Disable hover behavior on mobile */
+        .nav-menu li:hover > .sub-menu, nav li:hover > .sub-menu, .navbar li:hover > .sub-menu, #navMenu li:hover > .sub-menu { opacity: 0; visibility: hidden; pointer-events: none; }
+        .nav-menu li > .sub-menu.mobile-expanded, nav li > .sub-menu.mobile-expanded, .navbar li > .sub-menu.mobile-expanded, #navMenu li > .sub-menu.mobile-expanded { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
+        .nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu) { display: flex !important; flex-wrap: wrap !important; align-items: center !important; position: relative !important; min-height: 44px !important; }
+        .nav-menu li:has(.sub-menu) > a, nav li:has(.sub-menu) > a, .navbar li:has(.sub-menu) > a, #navMenu li:has(.sub-menu) > a { flex: 1 !important; min-width: 0 !important; }
+        .nav-menu li:has(.sub-menu) > .menu-group-title, nav li:has(.sub-menu) > .menu-group-title, .navbar li:has(.sub-menu) > .menu-group-title, #navMenu li:has(.sub-menu) > .menu-group-title { flex: 1 !important; min-width: 0 !important; padding: 0 !important; line-height: inherit !important; }
+        .nav-menu li:has(.sub-menu) > .sub-menu, nav li:has(.sub-menu) > .sub-menu, .navbar li:has(.sub-menu) > .sub-menu, #navMenu li:has(.sub-menu) > .sub-menu { flex-basis: 100% !important; width: 100% !important; }
+        .nav-menu li:has(.sub-menu) > a [class*="chevron"], .nav-menu li:has(.sub-menu) > a [class*="arrow"], .nav-menu li:has(.sub-menu) > a .fa-chevron-down, .nav-menu li:has(.sub-menu) > a .fa-angle-down, nav li:has(.sub-menu) > a [class*="chevron"], nav li:has(.sub-menu) > a [class*="arrow"], #navMenu li:has(.sub-menu) > a [class*="chevron"], #navMenu li:has(.sub-menu) > a [class*="arrow"] { display: none !important; visibility: hidden !important; }
+        .mobile-submenu-toggle { display: flex !important; align-items: center !important; justify-content: center !important; width: 44px !important; height: auto !important; background: transparent !important; border: none !important; cursor: pointer !important; color: var(--text-dark) !important; position: static !important; flex-shrink: 0 !important; align-self: stretch !important; z-index: 2 !important; padding: 0 !important; margin: 0 !important; }
+        .mobile-submenu-toggle::after { content: '' !important; width: 0 !important; height: 0 !important; border-left: 6px solid transparent !important; border-right: 6px solid transparent !important; border-top: 7px solid currentColor !important; transition: transform 0.3s ease !important; }
+        .mobile-submenu-toggle.expanded::after { transform: rotate(180deg) !important; }
+        .sub-menu a { padding: 10px 0 !important; display: block !important; color: var(--text-dark) !important; }
+        .navbar .sub-menu li a, nav.navbar .sub-menu li a, .zappy-products-dropdown .sub-menu a { color: var(--text-dark) !important; }
+      }
+      @media (min-width: 769px) { .mobile-submenu-toggle { display: none !important; } }
+    </style>
+
+    <style id="zappy-widget-visibility">
+      #mic-access-tool-general-button, .mic-access-tool-general-button,
+      #mic-init-access-tool .mic-access-tool-general-button, #mic-init-access-tool #mic-access-tool-general-button,
+      ._access-icon, #mic-access-tool-box, .mic-access-tool-box,
+      #mic-init-access-tool #mic-access-tool-box, div[id*="mic-access-tool-box"], ._access-menu {
+        display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;
+      }
+    </style>
+</head>
+<body>
+
+  <nav class="navbar">
+  <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+    <svg class="hamburger-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+    </svg>
+    <svg class="close-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" style="display:none;">
+      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+    </svg>
+  </button>
+  
+  <button class="phone-header-btn" aria-label="Call">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+    </svg>
+  </button>
+  
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a href="/" class="logo-link">
+        <img src="/assets/sjohnson-gaming-logo.webp" alt="SJohnson" class="logo" />
+      </a>
+    </div>
+    
+    <ul class="nav-menu" id="navMenu"><li><a href="/games">Games</a></li><li><a href="/devlog">Devlog</a></li></ul>
+    
+    <div class="nav-cta-container">
+      <a href="/contact" class="nav-cta-btn">Contact</a>
+    </div>
+  </div>
+</nav>
+  
+  <main>
+    <section class="home-hero-section" data-layout-spec="Home-Hero" data-hero-type="fullscreen-scrim">
+  <img data-hero-bg="true" data-placeholder="home-hero-bg" data-context="Moody indie game developer workbench scene: CRT monitor glowing with retro pixel art sprites, handwritten dev notes scattered on desk, colorful stickers on equipment, tangled cables, arcade joystick, warm desk lamp lighting, nostalgic early 2000s indie dev atmosphere, realistic photography style, cozy chaotic creative space" data-preserve-bg="0" width="1920" height="1080" src="/assets/site-home-hero-bg.webp" alt="Indie game developer workspace with CRT monitor and retro gaming equipment" class="home-hero-section__bg">
+  <div class="home-hero-section__scrim"></div>
+  <div class="home-hero-section__overlay">
+    <div class="home-hero-section__card">
+      <h1>Pixel Dreams &amp; Arcade Chaos</h1>
+      <h3>Building experimental indie games with early-2000s energy and nostalgic arcade vibes</h3>
+      <div class="home-hero-section__ctas">
+        <a href="/games" class="home-hero-section__btn home-hero-section__btn--primary">View Games</a>
+        <a href="/contact" class="home-hero-section__btn home-hero-section__btn--secondary">Work With Me</a>
+      </div>
+    </div>
+  </div>
+  <div class="home-hero-section__divider-wrapper">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 1200 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,80 L0,42 Q15,38 28,45 Q42,52 55,41 Q68,30 82,44 Q95,58 110,47 Q125,36 138,49 Q152,62 165,45 Q180,28 195,51 Q210,74 225,48 Q240,22 255,54 Q270,86 285,50 Q300,14 315,52 Q330,90 345,46 Q360,2 375,48 Q390,94 405,44 Q420,0 435,50 Q450,100 465,42 Q480,0 495,46 Q510,92 525,48 Q540,4 555,52 Q570,100 585,44 Q600,0 615,50 Q630,100 645,46 Q660,0 675,48 Q690,96 705,42 Q720,0 735,52 Q750,104 765,48 Q780,0 795,44 Q810,88 825,50 Q840,12 855,46 Q870,80 885,52 Q900,24 915,48 Q930,72 945,44 Q960,16 975,50 Q990,84 1005,46 Q1020,8 1035,52 Q1050,96 1065,48 Q1080,0 1095,44 Q1110,88 1125,50 Q1140,12 1155,46 Q1170,80 1185,52 Q1195,38 1200,42 L1200,80 Z" fill="var(--bg-light)"></path>
+    </svg>
+  </div>
+</section>
+
+<section class="home-showcase-section" data-layout-spec="Home-showcase">
+  <div class="home-showcase-container">
+    <div class="home-showcase-content">
+      <h2>Featured Experiments</h2>
+      <p class="home-showcase-intro">Each project is a playable idea with arcade DNA—quick to learn, hard to master, and built for that "one more try" feeling that hooks you from the first run.</p>
+      
+      <div class="home-showcase-games">
+        <article class="home-showcase-game-item">
+          <h3>Neon Dash Circuit</h3>
+          <p>Fast arcade loop where you navigate a glowing runner through procedural obstacle courses. Every second counts, every collision resets your combo.</p>
+          <a href="/games" class="btn-ghost">See details</a>
+        </article>
+        
+        <article class="home-showcase-game-item">
+          <h3>Gravity Flip Playground</h3>
+          <p>Strange physics toy that lets you reverse gravity mid-jump. Experiment with momentum, bounce angles, and impossible platforming sequences.</p>
+          <a href="/games" class="btn-ghost">See details</a>
+        </article>
+        
+        <article class="home-showcase-game-item">
+          <h3>Signal Lost</h3>
+          <p>Narrative microgame about a radio operator receiving cryptic transmissions. Make choices under time pressure as the signal fades.</p>
+          <a href="/games" class="btn-ghost">See details</a>
+        </article>
+      </div>
+    </div>
+    
+    <div class="home-showcase-imagery">
+      <div class="home-showcase-clipping home-showcase-clipping-1">
+        <div class="home-showcase-tape home-showcase-tape-tl"></div>
+        <div class="home-showcase-tape home-showcase-tape-br"></div>
+        <img data-placeholder="home-showcase-image-1" data-context="Screenshot of a fast-paced neon arcade game showing a glowing runner character navigating through colorful geometric obstacles in a retro pixel art style with vibrant cyan and yellow accents against a dark background" width="600" height="400" src="/assets/site-home-showcase-image-1.webp" alt="Neon Dash Circuit gameplay screenshot">
+      </div>
+      
+      <div class="home-showcase-clipping home-showcase-clipping-2">
+        <div class="home-showcase-tape home-showcase-tape-tl"></div>
+        <div class="home-showcase-tape home-showcase-tape-br"></div>
+        <img data-placeholder="home-showcase-image-2" data-context="Screenshot of a physics-based platformer game showing a character mid-gravity-flip with arrows indicating reversed gravity, featuring playful experimental level design with floating platforms and unusual angles in a retro indie game aesthetic" width="600" height="400" src="/assets/site-home-showcase-image-2.webp" alt="Gravity Flip Playground gameplay screenshot">
+      </div>
+      
+      <div class="home-showcase-clipping home-showcase-clipping-3">
+        <div class="home-showcase-tape home-showcase-tape-tl"></div>
+        <div class="home-showcase-tape home-showcase-tape-br"></div>
+        <img data-placeholder="home-showcase-image-3" data-context="Screenshot of a narrative game showing a vintage radio interface with glowing dials and static-filled display showing cryptic text messages, atmospheric dark room setting with warm amber lighting creating a mysterious retro vibe" width="600" height="400" src="/assets/site-home-showcase-image-3.webp" alt="Signal Lost gameplay screenshot">
+      </div>
+    </div>
+  </div>
+  
+  <div class="home-showcase-divider-wrapper">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 1200 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="halftone-dots" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+          <circle cx="4" cy="4" r="1.5" fill="rgba(20,22,27,0.3)"></circle>
+        </pattern>
+      </defs>
+      <path d="M0,60 L0,0 L1200,0 L1200,60 Z" fill="var(--bg-light)"></path>
+      <path d="M0,60 L0,20 Q300,15 600,20 T1200,20 L1200,60 Z" fill="var(--bg-light)"></path>
+    </svg>
+  </div>
+</section>
+
+<section class="home-stats-section" data-layout-spec="Home-stats">
+  <div class="home-stats-container">
+    <div class="home-stats-header">
+      <h2>Built Like an Arcade Cabinet</h2>
+      <p>Rapid iteration and player-first weirdness. Every game is a controlled experiment in fun.</p>
+    </div>
+    
+    <div class="home-stats-grid">
+      <div class="home-stats-card" style="transform: translateY(-6px);">
+        <div class="home-stats-number">10+</div>
+        <p class="home-stats-label">prototypes shipped</p>
+      </div>
+      
+      <div class="home-stats-card">
+        <div class="home-stats-number">Minutes</div>
+        <p class="home-stats-label">to fun first</p>
+      </div>
+      
+      <div class="home-stats-card" style="transform: translateY(8px);">
+        <div class="home-stats-number">100%</div>
+        <p class="home-stats-label">controller-friendly by default</p>
+      </div>
+      
+      <div class="home-stats-card">
+        <div class="home-stats-number">Tiny</div>
+        <p class="home-stats-label">teams, big swings</p>
+      </div>
+    </div>
+    
+    <div class="home-stats-devnote">
+      <p>If it feels slightly dangerous, it's probably the right idea.</p>
+    </div>
+  </div>
+  
+  <div class="home-stats-divider-wrapper">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 1200 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="neon-line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#00B8D9;stop-opacity:0.8"></stop>
+          <stop offset="50%" style="stop-color:#F2B705;stop-opacity:0.9"></stop>
+          <stop offset="100%" style="stop-color:#D96C4A;stop-opacity:0.7"></stop>
+        </linearGradient>
+      </defs>
+      <path d="M0,80 L0,65 L200,45 L400,35 L600,28 L800,32 L1000,40 L1200,50 L1200,80 Z" fill="var(--bg-light)"></path>
+      <path d="M0,65 L200,45 L400,35 L600,28 L800,32 L1000,40 L1200,50" stroke="url(#neon-line-gradient)" stroke-width="3" fill="var(--bg-light)" opacity="0.9"></path>
+    </svg>
+  </div>
+</section>
+
+<section class="home-testimonials-section" data-layout-spec="Home-testimonials">
+  <div class="testimonials-container">
+    <div class="testimonials-header">
+      <h2>Players Say It Best</h2>
+      <p>Real voices from the weird, wonderful community that makes every bug report feel like fan mail.</p>
+    </div>
+    
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <p class="quote">"Crashed my PC twice but I can't stop playing. This is the chaos I signed up for."</p>
+        <p class="attribution">— Alex Chen, Streamer</p>
+      </div>
+      
+      <div class="testimonial-card testimonial-card-tall">
+        <p class="quote">"SJohnson's games feel like finding a secret level in a game you've played a hundred times. Pure nostalgia fuel with fresh ideas."</p>
+        <p class="attribution">— Jordan Park, Player</p>
+      </div>
+      
+      <div class="testimonial-card">
+        <p class="quote">"Rough edges, big heart. Exactly what indie games should be."</p>
+        <p class="attribution">— Pixel Press Review</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="testimonials-divider-wrapper">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 1200 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="stitchPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="10" x2="12" y2="10" stroke="var(--border-dark)" stroke-width="2" stroke-dasharray="0"></line>
+        </pattern>
+        <pattern id="dashedPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="10" x2="20" y2="10" stroke="var(--border-dark)" stroke-width="2" stroke-dasharray="8 4"></line>
+        </pattern>
+      </defs>
+      <path d="M0,60 L0,30 L900,30 L1200,30 L1200,60 Z" fill="var(--bg-light)"></path>
+      <line x1="0" y1="30" x2="900" y2="30" stroke="url(#stitchPattern)" stroke-width="2"></line>
+      <line x1="900" y1="30" x2="1200" y2="30" stroke="url(#dashedPattern)" stroke-width="2"></line>
+    </svg>
+  </div>
+</section>
+
+<section class="home-cta-section" data-layout-spec="Home-cta">
+  <div class="home-cta-container">
+    <h2>Let's Make Something Weird</h2>
+    <p>Got a wild idea for a collaboration? Need a playtester who actually finishes games? Press inquiries welcome. I'm always down to chat about experimental mechanics, retro revivals, or projects that don't quite fit anywhere else.</p>
+    <a href="/contact" class="btn-primary">Contact SJohnson</a>
+    <p class="dev-note"><small>I reply personally (usually within 24hrs).<br>Especially love odd projects that break the mold.</small></p>
+  </div>
+</section>
+  </main>
+  
+  <footer class="site-footer"><div class="footer-container"><div class="footer-top"><div class="footer-column footer-about"><img src="/assets/sjohnson-gaming-logo.webp" alt="SJohnson" class="logo" /><p class="footer-tagline">Level up your gaming experience with SJohnson.</p></div><div class="footer-column footer-links"><h3 class="footer-heading">Quick Links</h3><ul class="footer-nav"><li><a href="/games">Games</a></li><li><a href="/devlog">Devlog</a></li><li><a href="/contact">Contact</a></li></ul></div><div class="footer-column footer-contact"><h3 class="footer-heading">Contact Us</h3><ul class="footer-contact-list"><li><i class="fas fa-envelope"></i><a href="mailto:[business_email]">[business_email]</a></li><li><i class="fas fa-phone"></i><a href="tel:[business_phone]">[business_phone]</a></li><li><a href="/"><i class="fas fa-map-marker-alt"></i><span>[business_address]</span></a></li></ul></div><div class="footer-column footer-social"><h3 class="footer-heading">Follow Us</h3><div class="social-links"><a href="[facebook_handle]" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="[instagram_handle]" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="[whatsapp_handle]" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a></div></div></div><div class="footer-bottom"><div class="footer-bottom-left"><p class="copyright">© 2026 SJohnson. All rights reserved.</p></div><div class="footer-bottom-right"><div class="legal-links"><a href="/privacy">Privacy Policy</a><span class="separator">|</span><a href="/terms">Terms &amp; Conditions</a><span class="separator">|</span><a href="/accessibility">Accessibility</a></div><a href="https://zappy5.com" target="_blank" class="zappy-attribution">Generated by Zappy</a></div></div></div></footer>
+  
+  <a href="https://wa.me/[whatsapp_handle]" class="whatsapp-float" aria-label="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+  
+  <div data-integration="accessibility:toolbar"></div>
+
+    <script src="/script.js"></script>
+
+    <script id="zappy-mobile-submenu-script">
+    (function() {
+      function initMobileSubmenuToggles() {
+        if (window.innerWidth > 768) {
+          document.querySelectorAll('.mobile-submenu-toggle').forEach(function(btn) { btn.remove(); });
+          document.querySelectorAll('.sub-menu.mobile-expanded').forEach(function(menu) { menu.classList.remove('mobile-expanded'); });
+          return;
+        }
+        var items = document.querySelectorAll('.nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu)');
+        items.forEach(function(li) {
+          if (li.querySelector('.mobile-submenu-toggle')) return;
+          var submenu = li.querySelector('.sub-menu');
+          var parentLink = li.querySelector(':scope > a');
+          if (!submenu || !parentLink) return;
+          var toggleBtn = document.createElement('button');
+          toggleBtn.className = 'mobile-submenu-toggle';
+          toggleBtn.setAttribute('aria-label', 'Toggle submenu');
+          toggleBtn.setAttribute('type', 'button');
+          parentLink.insertAdjacentElement('afterend', toggleBtn);
+          toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            document.querySelectorAll('.sub-menu.mobile-expanded').forEach(function(menu) {
+              if (menu !== submenu) { menu.classList.remove('mobile-expanded'); var t = menu.parentElement.querySelector('.mobile-submenu-toggle'); if(t) t.classList.remove('expanded'); }
+            });
+            submenu.classList.toggle('mobile-expanded');
+            toggleBtn.classList.toggle('expanded');
+          });
+        });
+      }
+      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initMobileSubmenuToggles); }
+      else { initMobileSubmenuToggles(); }
+      var resizeTimer; window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(initMobileSubmenuToggles, 250); });
+      // Re-initialize when mobile menu becomes visible (MutationObserver)
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes') {
+            var target = mutation.target;
+            if (target.classList && (target.classList.contains('active') || target.classList.contains('open'))) {
+              setTimeout(initMobileSubmenuToggles, 100);
+            }
+          }
+        });
+      });
+      setTimeout(function() {
+        document.querySelectorAll('.mobile-menu, .nav-menu, #navMenu, nav').forEach(function(menu) {
+          observer.observe(menu, { attributes: true, attributeFilter: ['class', 'style'] });
+        });
+      }, 500);
+    })();
+    </script>
+
+    <script id="zappy-navbar-scroll-effect">
+    (function(){var nb=document.querySelector('nav.navbar,.navbar:not(.zappy-catalog-menu)');var cm=document.querySelector('.zappy-catalog-menu');if(!nb)return;var fb='rgba(20,22,27,0.85)';var th=60;nb.style.transition='background 0.3s ease,backdrop-filter 0.3s ease,-webkit-backdrop-filter 0.3s ease,box-shadow 0.3s ease';if(cm)cm.style.transition='background 0.3s ease,backdrop-filter 0.3s ease,-webkit-backdrop-filter 0.3s ease';function onS(){var y=window.scrollY||window.pageYOffset;if(y>th){nb.style.background=fb;nb.style.backdropFilter='blur(12px)';nb.style.webkitBackdropFilter='blur(12px)';nb.style.boxShadow='0 2px 16px rgba(0,0,0,0.12)';if(cm){cm.style.background=fb;cm.style.backdropFilter='blur(12px)';cm.style.webkitBackdropFilter='blur(12px)';}}else{nb.style.background='transparent';nb.style.backdropFilter='none';nb.style.webkitBackdropFilter='none';nb.style.boxShadow='none';if(cm){cm.style.background='transparent';cm.style.backdropFilter='none';cm.style.webkitBackdropFilter='none';}}}window.addEventListener('scroll',onS,{passive:true});onS();})();
+    </script>
+</body>
+</html>

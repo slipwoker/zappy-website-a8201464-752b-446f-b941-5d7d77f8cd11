@@ -1,0 +1,47 @@
+# Business — Generative Engine Optimization Map
+
+---
+
+## Pages
+
+### Home
+https://example.com
+SJohnson crafts nostalgic indie games with early-2000s arcade charm. Experience authentic, experimental video game developer magic that celebrates chaos.
+
+### Games
+https://example.com/games
+Dive into SJohnson&#39;s collection of unpolished, authentic indie games. Old-school arcade vibes meet experimental gameplay. Download and play now!
+
+### Devlog
+https://example.com/devlog
+Follow SJohnson&#39;s game development journey. Raw devlogs from a rust game developer building nostalgic, experimental titles with authentic indie spirit.
+
+### Contact
+https://example.com/contact
+Ready to connect? Reach out to SJohnson for collaborations, feedback, or just to chat about retro gaming culture and indie video game developer life.
+
+## Legal & Policy
+
+### Privacy Policy
+https://example.com/privacy
+Information about how user data is collected, stored, and protected.
+
+### Terms & Conditions
+https://example.com/terms
+Legal terms describing service usage, rights, and policies.
+
+### Accessibility Statement
+https://example.com/accessibility
+Information about WCAG compliance and accessibility features.
+
+---
+
+# Business Context (for LLM understanding)
+
+## About Business
+---
+
+# Additional Resources
+
+- **Sitemap**: https://example.com/sitemap.xml
+- **Robots.txt**: https://example.com/robots.txt
